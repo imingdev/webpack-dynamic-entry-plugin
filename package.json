@@ -1,6 +1,6 @@
 {
   "name": "webpack-dynamic-entry-plugin",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "根据glob规则自动注入webpack entry",
   "author": "imingdev <mingdev@163.com>",
   "license": "MIT",
