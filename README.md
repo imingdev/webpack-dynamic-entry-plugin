@@ -1,0 +1,1 @@
+根据glob规则自动注入webpackentry
