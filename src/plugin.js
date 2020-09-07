@@ -2,7 +2,7 @@ const path = require('path');
 const glob = require('glob');
 const globBase = require('glob-base');
 
-let globBaseDirectory;
+let directorys = [];
 
 module.exports = class WebpackDynamicEntryPlugin {
   constructor() {
@@ -14,27 +14,31 @@ module.exports = class WebpackDynamicEntryPlugin {
    * @param options glob选项
    */
   static getEntry(pattern, options = {}, entryHandle) {
-    globBaseDirectory = globBase(pattern).base
+    if (typeof pattern === 'string') pattern = [pattern]
 
     return () => {
       let entry = {}
+      pattern.forEach(globStr => {
+        const baseDir = globBase(globStr).base
+        if (!directorys.includes(baseDir)) directorys.push(baseDir)
 
-      glob.sync(pattern, options).forEach(file => {
-        // 格式化 entryName
-        const entryName = path
-          .relative(globBaseDirectory, file)
-          .replace(path.extname(file), '')
-          .split(path.sep)
-          .filter(Boolean)
-          .join('/');
+        glob.sync(globStr, options).forEach(file => {
+          // 格式化 entryName
+          const entryName = path
+            .relative(globStr, file)
+            .replace(path.extname(file), '')
+            .split(path.sep)
+            .filter(Boolean)
+            .join('/');
 
-        if (entryHandle) {
-          const {name, path} = entryHandle(entryName, file)
-          entry[name] = path
-        } else {
-          entry[entryName] = file
-        }
+          if (entryHandle) {
+            const {name, path} = entryHandle(entryName, file)
+            entry[name] = path
+          } else {
+            entry[entryName] = file
+          }
 
+        })
       })
       return entry
     };
@@ -59,10 +63,12 @@ module.exports = class WebpackDynamicEntryPlugin {
     const contextDependencies = compilation.contextDependencies
     if (Array.isArray(contextDependencies)) {
       // Support Webpack < 4
-      compilation.contextDependencies = contextDependencies.concat([globBaseDirectory]);
+      compilation.contextDependencies = contextDependencies.concat(directorys);
     } else {
       // Support Webpack >= 4
-      compilation.contextDependencies.add(globBaseDirectory);
+      for (const dir of directorys) {
+        compilation.contextDependencies.add(dir);
+      }
     }
     callback && callback();
   }
