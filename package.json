@@ -1,10 +1,10 @@
 {
   "name": "webpack-dynamic-entry-plugin",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "根据glob规则自动注入webpack entry",
   "author": "imingdev <mingdev@163.com>",
   "license": "MIT",
-  "main": "src/plugin.js",
+  "main": "dist/plugin.js",
   "scripts": {
     "prebuild": "node_modules/.bin/rimraf ./dist",
     "build": "cross-env NODE_ENV=production node_modules/.bin/babel src -d dist --copy-files"
