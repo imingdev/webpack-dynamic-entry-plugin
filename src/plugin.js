@@ -25,7 +25,7 @@ module.exports = class WebpackDynamicEntryPlugin {
         glob.sync(globStr, options).forEach(file => {
           // 格式化 entryName
           const entryName = path
-            .relative(globStr, file)
+            .relative(baseDir, file)
             .replace(path.extname(file), '')
             .split(path.sep)
             .filter(Boolean)
