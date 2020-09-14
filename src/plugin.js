@@ -4,6 +4,14 @@ const globBase = require('glob-base');
 
 let directorys = [];
 
+// 格式化路径
+const formatFilePath = (_path) => {
+  const sep = path.sep;
+  if (_path.includes(sep)) return _path.split(sep).filter(Boolean).join('/');
+
+  return _path
+};
+
 module.exports = class WebpackDynamicEntryPlugin {
   constructor() {
   }
@@ -13,7 +21,7 @@ module.exports = class WebpackDynamicEntryPlugin {
    * @param pattern glob参数
    * @param options glob选项
    */
-  static getEntry(pattern, options = {}, entryHandle) {
+  static getEntry({pattern, options = {}, generate} = {}) {
     if (typeof pattern === 'string') pattern = [pattern]
 
     return () => {
@@ -24,22 +32,11 @@ module.exports = class WebpackDynamicEntryPlugin {
 
         glob.sync(globStr, options).forEach(file => {
           // 格式化 entryName
-          const entryName = path
-            .relative(baseDir, file)
-            .replace(path.extname(file), '')
-            .split(path.sep)
-            .filter(Boolean)
-            .join('/');
-
-          if (entryHandle) {
-            const {name, path} = entryHandle(entryName, file)
-            entry[name] = path
-          } else {
-            entry[entryName] = file
-          }
-
+          const entryName = formatFilePath(path.relative(baseDir, file).replace(path.extname(file), ''));
+          entry[entryName] = file
         })
       })
+      if (generate && typeof generate === 'function') return generate(entry)
       return entry
     };
   }
